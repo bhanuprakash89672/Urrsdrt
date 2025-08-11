@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>浳|•ɪɢʀɪs ཌ - Advanced Prediction Platform</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+    <script src="loader.js" defer></script>
+</head>
+<body>
+    <div id="win-animation" class="win-animation"></div>
+    <div id="loss-animation" class="loss-animation"></div>
+    <div id="predictionSection" class="page-section active">
+        <div class="w-full">
+            <header class="text-center mt-0 mb-3" style="display: block;">
+                <svg viewBox="0 0 700 100" preserveAspectRatio="xMidYMid meet"><text x="50%" y="50%">浳 DAMMNNN  x  KAILASH</text></svg>
+            </header>
+            <div class="max-w-full mx-auto px-2 sm:px-4 w-full">
+                <div class="max-w-3xl mx-auto p-2 sm:p-3 w-full">
+                    <div id="homeSection" class="content-section active">
+                        <div class="prediction-display-card">
+                             <div class="prediction-main-content">
+                                 <h2 class="label" data-en="AI Prediction" data-hi="एआई भविष्यवाणी"><i class="fas fa-lightbulb text-sm text-[var(--primary-color)]"></i>AI Prediction</h2>
+                                 <p id="currentPrediction" class="font-semibold">-</p>
+                            </div>
+                            <div class="prediction-footer">
+                                <div class="flex items-center gap-2"><i class="fas fa-calendar-alt text-sm text-[var(--primary-color)]"></i><span data-en="Period:" data-hi="अवधि:">Period:</span><span id="currentPeriod" class="font-semibold">-</span></div>
+                                <div class="flex items-center gap-2"><span id="serverStatusText">Connecting...</span><span id="apiLoader" class="loader" style="display:none;"></span></div>
+                            </div>
+                        </div>
+
+
+                        <div class="styled-card mb-5 p-3 sm:p-5">
+                            <h2 class="text-lg sm:text-xl font-bold text-center mb-4 relative" data-en="Analysis Dashboard" data-hi="विश्लेषण डैशबोर्ड"><span class="relative z-10">Analysis Dashboard</span><span class="absolute top-1/2 left-0 w-full h-px bg-[var(--primary-color)] -translate-y-1/2 opacity-25"></span></h2>
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-3.5">
+                                <div class="analysis-dashboard-item"><p data-en="Wins" data-hi="जीत"><i class="fas fa-trophy text-[var(--success-color)]"></i>Wins</p><p id="wins">0</p></div>
+                                <div class="analysis-dashboard-item"><p data-en="Losses" data-hi="हार"><i class="fas fa-shield-halved text-[var(--danger-color)]"></i>Losses</p><p id="losses">0</p></div>
+                                <div class="analysis-dashboard-item"><p data-en="Win Rate" data-hi="जीत दर"><i class="fas fa-bullseye text-[var(--primary-color)]"></i>Win Rate</p><p id="accuracy">0%</p></div>
+                                <div class="analysis-dashboard-item"><p data-en="AI Logic" data-hi="एआई लॉजिक"><i class="fas fa-brain text-[var(--primary-color)]"></i>AI Logic</p><p id="currentAiLogic" class="text-sm sm:text-base font-bold">-</p></div>
+                                <div class="analysis-dashboard-item"><p data-en="Streak" data-hi="लगातार जीत"><i class="fas fa-fire text-[var(--warning-color)]"></i>Streak</p><p id="currentStreak">-</p></div>
+                                <div class="analysis-dashboard-item"><p data-en="Last 5" data-hi="अंतिम 5"><i class="fas fa-chart-line text-[var(--secondary-color)]"></i>Last 5</p><p id="lastFiveResults" class="text-sm sm:text-base font-bold">-</p></div>
+                            </div>
+                                <p id="gameStatusMessage" class="text-center text-xs opacity-80 mt-3 text-[var(--primary-color)]"></p>
+                        </div>
+                    </div>
+                    <div id="historySection" class="content-section"><div class="styled-card p-3 sm:p-5"><div class="flex justify-between items-center mb-4"><h2 class="text-lg sm:text-xl font-bold" data-en="Prediction History" data-hi="भविष्यवाणी इतिहास">Prediction History</h2><div class="flex gap-2"><button id="downloadHistoryBtn" class="btn-main text-xs sm:text-sm"><i class="fas fa-download mr-1.5"></i><span data-en="Download" data-hi="डाउनलोड करें">Download</span></button><button id="clearHistoryBtn" class="btn-main text-xs sm:text-sm"><i class="fas fa-trash mr-1.5"></i><span data-en="Clear" data-hi="साफ़ करें">Clear</span></button></div></div><div id="historyContainer" class="history-container"></div></div></div>
+                    
+                    <div id="adminSection" class="content-section">
+                        <div class="styled-card p-3 sm:p-5">
+                            <h2 class="text-lg sm:text-xl font-bold text-center mb-4" data-en="Admin Panel" data-hi="व्यवस्थापक पैनल">Admin Panel</h2>
+                            <div id="adminLogin" class="admin-controls space-y-4">
+                                <label for="adminPassword" data-en="Admin Password" data-hi="व्यवस्थापक पासवर्ड">Admin Password</label>
+                                <input type="password" id="adminPassword" placeholder="Enter password">
+                                <button id="loginAdminBtn" class="btn-main w-full" data-en="Login" data-hi="लॉगिन करें">Login</button>
+                            </div>
+                            <div id="adminControls" class="admin-controls space-y-4" style="display:none;">
+                                <h3 class="font-semibold" data-en="Device Access Control" data-hi="डिवाइस एक्सेस नियंत्रण">Device Access Control</h3>
+                                <div>
+                                    <label for="deviceIdInput" data-en="Device ID" data-hi="डिवाइस आईडी">Device ID</label>
+                                    <input type="text" id="deviceIdInput" placeholder="Enter device ID">
+                                </div>
+                                <div>
+                                    <label for="validityInput" data-en="Validity (days)" data-hi="वैधता (दिनों में)">Validity (days)</label>
+                                    <input type="number" id="validityInput" value="30">
+                                </div>
+                                <div>
+                                    <label for="userRoleSelect" data-en="User Role" data-hi="उपयोगकर्ता भूमिका">User Role</label>
+                                    <select id="userRoleSelect">
+                                        <option value="user" data-en="User" data-hi="उपयोगकर्ता">User</option>
+                                        <option value="admin" data-en="Admin" data-hi="व्यवस्थापक">Admin</option>
+                                    </select>
+                                </div>
+                                <button id="grantAccessBtn" class="btn-main w-full" data-en="Grant Access" data-hi="एक्सेस दें">Grant Access</button>
+                                <hr class="border-[var(--border-color)] my-4">
+                                <h3 class="font-semibold" data-en="Telegram Automation (Admin Only)" data-hi="टेलीग्राम ऑटोमेशन (केवल एडमिन)">Telegram Automation (Admin Only)</h3>
+                                <div>
+                                    <label for="telegramBotToken" data-en="Telegram Bot Token" data-hi="टेलीग्राम बॉट टोकन">Telegram Bot Token</label>
+                                    <input type="password" id="telegramBotToken" placeholder="Enter bot API key">
+                                </div>
+                                <div>
+                                    <label for="telegramChatId" data-en="Channel Chat ID" data-hi="चैनल चैट आईडी">Channel Chat ID</label>
+                                    <input type="text" id="telegramChatId" placeholder="Enter channel ID (e.g., -1001234567890)">
+                                </div>
+                                <button id="startAutoPredictionBtn" class="btn-main w-full" data-en="Start Auto Prediction" data-hi="स्वचालित भविष्यवाणी शुरू करें">Start Auto Prediction</button>
+                                <button id="stopAutoPredictionBtn" class="btn-main w-full" data-en="Stop Auto Prediction" data-hi="स्वचालित भविष्यवाणी रोकें" style="display: none;">Stop Auto Prediction</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="profileSection" class="content-section">
+                        <div class="styled-card p-3 sm:p-5">
+                            <h2 class="text-lg sm:text-xl font-bold text-center mb-4" data-en="Your Profile" data-hi="आपकी प्रोफ़ाइल">Your Profile</h2>
+                            <div class="space-y-4">
+                                <div class="styled-card p-3">
+                                    <h3 class="font-semibold mb-2" data-en="User Information" data-hi="उपयोगकर्ता जानकारी">User Information</h3>
+                                    <div class="mb-3 text-sm opacity-80">
+                                        <p>Device ID: <span id="userDeviceId" class="font-bold"></span></p>
+                                        <p>Status: <span id="userStatus" class="font-bold">Pending</span></p>
+                                        <p>Role: <span id="userRole" class="font-bold">User</span></p>
+                                    </div>
+                                    <label for="userName" class="block text-sm opacity-80 mb-1" data-en="Your Name" data-hi="आपका नाम">Your Name</label>
+                                    <input type="text" id="userName" class="profile-input" placeholder="Enter your name" data-en-placeholder="Enter your name" data-hi-placeholder="अपना नाम दर्ज करें" disabled>
+                                    <label for="userBio" class="block text-sm opacity-80 mt-3 mb-1" data-en="Your Bio" data-hi="आपकी बायो">Your Bio</label>
+                                    <textarea id="userBio" class="profile-input" rows="3" placeholder="Write something about yourself..." data-en-placeholder="Write something about yourself..." data-hi-placeholder="अपने बारे में कुछ लिखें..."></textarea>
+                                    <button id="saveProfileBtn" class="btn-main w-full mt-4" data-en="Save Profile" data-hi="प्रोफ़ाइल सहेजें">Save Profile</button>
+                                </div>
+                                <div class="styled-card p-3">
+                                    <h3 class="font-semibold mb-2" data-en="Lifetime Statistics" data-hi="जीवन भर के आँकड़े">Lifetime Statistics</h3>
+                                    <div id="profileStatsGrid" class="profile-stats-grid">
+                                        <div class="profile-stats-box">
+                                            <p class="label" data-en="Total Wins" data-hi="कुल जीत">Total Wins</p>
+                                            <p id="profileTotalWins" class="value">0</p>
+                                        </div>
+                                        <div class="profile-stats-box">
+                                            <p class="label" data-en="Total Losses" data-hi="कुल हार">Total Losses</p>
+                                            <p id="profileTotalLosses" class="value">0</p>
+                                        </div>
+                                        <div class="profile-stats-box">
+                                            <p class="label" data-en="Win Rate" data-hi="जीत दर">Win Rate</p>
+                                            <p id="profileWinRate" class="value">0%</p>
+                                        </div>
+                                        <div class="profile-stats-box">
+                                            <p class="label" data-en="Current Streak" data-hi="वर्तमान स्ट्रीक">Current Streak</p>
+                                            <p id="profileCurrentStreak" class="value">0</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="styled-card p-3">
+                                    <h3 class="font-semibold mb-2" data-en="Settings & Support" data-hi="सेटिंग्स और समर्थन">Settings & Support</h3>
+                                    <div class="flex justify-between items-center mb-3">
+                                        <p class="text-sm" data-en="Change Language" data-hi="भाषा बदलें">Change Language</p>
+                                        <div class="flex gap-2">
+                                            <button id="langEnglish" class="btn-main text-xs py-2 px-4">EN</button>
+                                            <button id="langHindi" class="btn-outline text-xs py-2 px-4">HI</button>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-2 justify-center">
+                                        <a id="telegramLink1" href="#" class="btn-main text-xs py-2 px-4"><i class="fab fa-telegram"></i> @DammnnSonn</a>
+                                        <a id="telegramLink2" href="#" class="btn-main text-xs py-2 px-4"><i class="fab fa-telegram"></i> @Kailash_modz_009</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="worldSection" class="content-section">
+                        <div class="styled-card p-3 sm:p-5">
+                            <h2 class="text-lg sm:text-xl font-bold text-center mb-4" data-en="World Leaderboard" data-hi="विश्व लीडरबोर्ड">World Leaderboard</h2>
+                            <div class="mb-4">
+                                <div class="flex items-center gap-2">
+                                    <input type="text" id="userSearchInput" class="profile-input flex-1" placeholder="Search by name or ID..." data-en-placeholder="Search by name or ID..." data-hi-placeholder="नाम या आईडी द्वारा खोजें...">
+                                    <button id="userSearchBtn" class="btn-main px-4 py-2"><i class="fas fa-search"></i></button>
+                                </div>
+                                <div id="userSearchResult" class="mt-3 hidden styled-card p-3"></div>
+                            </div>
+                            <div id="topUsersList">
+                                <p class="text-center opacity-70" data-en="Loading top users..." data-hi="शीर्ष उपयोगकर्ता लोड हो रहे हैं...">Loading top users...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="aboutSection" class="content-section">
+                        <div class="styled-card p-3 sm:p-5">
+                            <h2 class="text-lg sm:text-xl font-bold text-center mb-4" data-en="About Us" data-hi="हमारे बारे में">About Us</h2>
+                            <p class="text-md leading-relaxed mb-4" data-en="Welcome to our advanced prediction platform, a fusion of cutting-edge AI and a community of skilled analysts. We strive to provide accurate predictions based on complex algorithms and real-time data analysis. Our mission is to empower our users with the information they need to make informed decisions." data-hi="हमारे उन्नत भविष्यवाणी प्लेटफॉर्म में आपका स्वागत है, जो अत्याधुनिक AI और कुशल विश्लेषकों के समुदाय का एक संगम है। हम जटिल एल्गोरिदम और रीयल-टाइम डेटा विश्लेषण के आधार पर सटीक भविष्यवाणियां प्रदान करने का प्रयास करते हैं। हमारा मिशन हमारे उपयोगकर्ताओं को सूचित निर्णय लेने के लिए आवश्यक जानकारी के साथ सशक्त बनाना है।">
+                                Welcome to our advanced prediction platform, a fusion of cutting-edge AI and a community of skilled analysts. We strive to provide accurate predictions based on complex algorithms and real-time data analysis. Our mission is to empower our users with the information they need to make informed decisions.
+                            </p>
+                            <p class="text-md leading-relaxed" data-en="This platform is the result of a collaborative effort between dedicated developers and community experts like <span class='about-highlight'>DAMMNNN</span> and <span class='about-highlight'>KAILASH</span>. We are continuously improving our models and features to ensure a seamless and rewarding experience for everyone." data-hi="यह प्लेटफ़ॉर्म DAMMNNN और KAILASH जैसे समर्पित डेवलपर्स औरAI विशेषज्ञों के बीच एक सहयोगी प्रयास का परिणाम है। हम सभी के लिए एक सहज और पुरस्कृत अनुभव सुनिश्चित करने के लिए अपने मॉडल और सुविधाओं में लगातार सुधार कर रहे हैं।">
+                                This platform is the result of a collaborative effort between dedicated developers and community experts like <span class="about-highlight">DAMMNNN</span> and <span class="about-highlight">KAILASH</span>. We are continuously improving our models and features to ensure a seamless and rewarding experience for everyone.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div id="settingsSection" class="content-section">
+                        <div class="styled-card p-3 sm:p-5">
+                            <h2 class="text-xl sm:text-2xl font-bold text-center mb-3.5" data-en="Magic Control Panel" data-hi="जादुई नियंत्रण पैनल">🎭 Magic Control Panel 🎭</h2>
+                            <p class="text-center text-sm opacity-80 mb-4" data-en="Where dreams meet reality and predictions get spicy!" data-hi="जहां सपने हकीकत से मिलते हैं और भविष्यवाणियां मसालेदार हो जाती हैं!">Where dreams meet reality and predictions get spicy!</p>
+                            
+                            <div class="space-y-4">
+                                <div class="styled-card p-3">
+                                    <h3 class="text-lg font-semibold mb-2 flex items-center gap-2" data-en="Prediction Speed Booster" data-hi="भविष्यवाणी गति बूस्टर">
+                                        <i class="fas fa-clock text-[var(--secondary-color)]"></i>
+                                        Prediction Speed Booster
+                                    </h3>
+                                    <p class="text-sm opacity-80 mb-3" data-en="How fast should we fetch the crystal ball?" data-hi="हमें क्रिस्टल बॉल कितनी तेजी से लानी चाहिए?">How fast should we fetch the crystal ball?</p>
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-sm" data-en="Slow" data-hi="धीमा">Slow</span>
+                                        <input type="range" id="predictionSpeed" min="1" max="10" value="5" class="flex-1">
+                                        <span class="text-sm" data-en="Lightning" data-hi="तेज">Lightning</span>
+                                    </div>
+                                    <p class="text-xs opacity-60 mt-2" data-en="Current: " data-hi="वर्तमान: ">Current: <span id="speedDisplay">Normal</span></p>
+                                </div>
+
+                                <div class="styled-card p-3">
+                                    <h3 class="text-lg font-semibold mb-2 flex items-center gap-2" data-en="Cosmic Theme Selector" data-hi="कॉस्मिक थीम चयनकर्ता">
+                                        <i class="fas fa-palette text-[var(--warning-color)]"></i>
+                                        Cosmic Theme Selector
+                                    </h3>
+                                    <p class="text-sm opacity-80 mb-3" data-en="Change the vibe, change your luck!" data-hi="वाइब बदलें, अपनी किस्मत बदलें!">Change the vibe, change your luck!</p>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <button class="theme-btn btn-outline text-xs py-2" data-theme="default" data-en="🌌 Cosmic Blue" data-hi="🌌 कॉस्मिक नीला">🌌 Cosmic Blue</button>
+                                        <button class="theme-btn btn-outline text-xs py-2" data-theme="green" data-theme="green" data-en="💚 Lucky Green" data-hi="💚 भाग्यशाली हरा">💚 Lucky Green</button>
+                                        <button class="theme-btn btn-outline text-xs py-2" data-theme="purple" data-theme="purple" data-en="🔮 Mystic Purple" data-hi="🔮 रहस्यमय बैंगनी">🔮 Mystic Purple</button>
+                                        <button class="theme-btn btn-outline text-xs py-2" data-theme="gold" data-en="✨ Golden Hour" data-hi="✨ सुनहरा घंटा">✨ Golden Hour</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="swipe-indicator"><i class="fas fa-chevron-up"></i> <span data-en="Swipe up for more options" data-hi="अधिक विकल्पों के लिए ऊपर स्वाइप करें">Swipe up for more options</span> <i class="fas fa-chevron-up"></i></div>
+            <div id="predictionNavigation" class="navigation hidden">
+                <ul>
+                    <li class="active"><a href="#" data-section="homeSection"><span class="icon"><ion-icon name="home-outline"></ion-icon></span><span class="text" data-en="Home" data-hi="होम">Home</span></a></li>
+                    <li><a href="#" data-section="historySection"><span class="icon"><ion-icon name="time-outline"></ion-icon></span><span class="text" data-en="History" data-hi="इतिहास">History</span></a></li>
+                    <li id="adminNav" style="display:none;"><a href="#" data-section="adminSection"><span class="icon"><ion-icon name="hammer-outline"></ion-icon></span><span class="text" data-en="Admin" data-hi="व्यवस्थापक">Admin</span></a></li>
+                    <li><a href="#" data-section="profileSection"><span class="icon"><ion-icon name="person-circle-outline"></ion-icon></span><span class="text" data-en="Profile" data-hi="प्रोफ़ाइल">Profile</span></a></li>
+                    <li><a href="#" data-section="worldSection"><span class="icon"><ion-icon name="earth-outline"></ion-icon></span><span class="text" data-en="World" data-hi="विश्व">World</span></a></li>
+                    <li><a href="#" data-section="aboutSection"><span class="icon"><ion-icon name="information-circle-outline"></ion-icon></span><span class="text" data-en="About" data-hi="बारे में">About</span></a></li>
+                    <li><a href="#" data-section="settingsSection"><span class="icon"><ion-icon name="settings-outline"></ion-icon></span><span class="text" data-en="Settings" data-hi="सेटिंग्स">Magic Panel</span></a></li>
+                </ul>
+            </div>
+            
+            <div id="clearHistoryModal" class="popup">
+                <div class="popup-content">
+                    <h2 data-en="Confirm Clear" data-hi="पुष्टि करें साफ़ करें">Confirm Clear</h2>
+                    <p data-en="Are you sure you want to clear all history?" data-hi="क्या आप वाकई पूरा इतिहास साफ़ करना चाहते हैं?">Are you sure you want to clear all history?</p>
+                    <div class="button-group">
+                        <button id="confirmClear" class="btn-main" data-en="Yes, Clear" data-hi="हाँ, साफ़ करें">Yes, Clear</button>
+                        <button id="cancelClear" class="btn-outline" data-en="No, Cancel" data-hi="नहीं, रद्द करें">No, Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="maintenancePopup" class="popup">
+                <div class="popup-content">
+                    <i class="fas fa-tools text-2xl sm:text-3xl text-[var(--warning-color)] mb-3.5"></i>
+                    <p class="text-base sm:text-lg font-semibold mb-1.5" data-en="Platform Maintenance" data-hi="प्लेटफ़ॉर्म रखरखाव">Platform Maintenance</p>
+                    <p class="text-sm sm:text-base mb-4" data-en="We are currently performing scheduled maintenance." data-hi="हम वर्तमान में निर्धारित रखरखाव कर रहे हैं।">We are currently performing scheduled maintenance.</p>
+                    <button id="closeMaintenanceBtn" class="btn-main w-full" data-en="Close" data-hi="बंद करें">Close</button>
+                </div>
+            </div>
+
+            <div id="userNamePopup" class="popup user-name-popup">
+                <div class="popup-content">
+                    <h2 data-en="Welcome, new user!" data-hi="स्वागत है, नए उपयोगकर्ता!">Welcome, new user!</h2>
+                    <p data-en="Please enter your name to get started. You won't be able to change this later." data-hi="शुरू करने के लिए कृपया अपना नाम दर्ज करें। आप इसे बाद में नहीं बदल पाएंगे।">Please enter your name to get started. You won't be able to change this later.</p>
+                    <input type="text" id="userNameInputFirstTime" placeholder="Enter your name" data-en-placeholder="Enter your name" data-hi-placeholder="अपना नाम दर्ज करें">
+                    <button id="saveNameBtn" class="btn-main w-full mt-4" data-en="Save Name" data-hi="नाम सहेजें">Save Name</button>
+                </div>
+            </div>
+
+            <div id="userProfilePopup" class="popup">
+                <div class="user-profile-popup-content">
+                    <button class="close-btn" onclick="hidePopup('userProfilePopup')">&times;</button>
+                    <h2 id="userProfilePopupName" class="text-2xl font-bold mb-2">User Name</h2>
+                    <p id="userProfilePopupBio" class="text-sm opacity-70 mb-4">User Bio</p>
+                    <div class="profile-stats-grid">
+                        <div class="profile-stats-box">
+                            <p class="label">Total Wins</p>
+                            <p id="popupTotalWins" class="value">0</p>
+                        </div>
+                        <div class="profile-stats-box">
+                            <p class="label">Total Losses</p>
+                            <p id="popupTotalLosses" class="value">0</p>
+                        </div>
+                        <div class="profile-stats-box">
+                            <p class="label">Win Rate</p>
+                            <p id="popupWinRate" class="value">0%</p>
+                        </div>
+                        <div class="profile-stats-box">
+                            <p class="label">Highest Streak</p>
+                            <p id="popupHighestStreak" class="value">0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div id="toast" class="toast"><p id="toastMessage" class="text-sm"></p></div>
+        </div>
+    </div>
+</body>
+</html>
